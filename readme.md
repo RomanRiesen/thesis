@@ -24,20 +24,20 @@ git clone --recurse-submodules github.com/RomanRiesen/thesis
 Then cd into the cloned directory:
 
 ```bash
-    cd thesis
+cd thesis
 ```
 
 Now run
 
 ```bash
-    docker build -t "fprime_with_reelay" .
+docker build -t "fprime_with_reelay" .
 ```
 
 to construct the docker image, which will take a few minutes (easily ten or more). The resulting image will als be pretty big at around 2.5 GB.
 After the successful completion of the image generation we can run it:
 
 ```bash
-    docker run -it -p 5000:5000 fprime_with_reelay
+docker run -it -p 5000:5000 fprime_with_reelay
 ```
 
 Now you should be able to navigate to 127.0.0.1:5000 in a web browser and then see the fprime ground station.
