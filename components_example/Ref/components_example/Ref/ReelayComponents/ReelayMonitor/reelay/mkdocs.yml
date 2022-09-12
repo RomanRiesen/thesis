@@ -1,0 +1,63 @@
+site_name: Reelay
+repo_url: https://github.com/doganulus/reelay
+docs_dir: docs
+edit_uri: 'edit/master/docs/'
+theme:
+  name: material
+  include_search_page: false
+  # search_index_only: true
+  language: en
+  palette:
+    primary: black
+    accent: red
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
+  favicon: assets/logo_diamond_black.png
+  logo: assets/logo_diamond.png
+
+
+nav:
+  - Home: 'index.md'
+
+  - Install:
+    - 'From Source' : 'install.md'
+    - 'Docker Image' : 'docker.md'
+
+  - Get Started:
+    - 'Tutorial: Introduction' : 'gs_intro.md'
+    - 'Use Reelay from C++' : 'gs_cpp.md'
+    - 'Use Reelay from Python' : 'gs_python.md'
+
+  - User Manual: 
+    - 'Temporal Behaviors' : 'behaviors.md'
+    - 'Rye Format' : 'rye.md'
+    # - 'C++ API' : 'cpp_api.md'
+    # - 'Python API' : 'python_api.md'
+    - 'Benchmarking' : 'performance.md'
+
+  - Advanced Topics: 
+  #   - 'Time Models' : 'time_models.md'
+  #   - 'Temporal Logic' : 'temporal_logic.md'
+  #   - 'Robustness' : 'robustness.md'
+  #   - 'Regular Expressions' : 'regular_expressions.md'
+  #   - 'Sequential Networks' : 'sequential_networks.md'
+     - 'References' : 'literature.md'
+
+  - About:
+    - 'Author' : 'author.md'
+    - 'License' : 'license.md'
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - footnotes
+  - markdown.extensions.codehilite:
+      guess_lang: false
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+google_analytics: ['UA-153753179-1', 'auto']

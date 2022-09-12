@@ -1,0 +1,7 @@
+rocketSimulator.height
+rocketSimulator.acceleration
+rocketSimulator.burnrate
+rocketSimulator.remaining_fuel
+rocketSimulator.v_I
+rocketSimulator.v_Delta
+rocketSimulator.v_Doppler

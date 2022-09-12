@@ -1,0 +1,59 @@
+<dashboard-box title="Rocket Overview" color="green">
+    <dashboard-box title="This item is on top"/>
+    <dashboard-box title="But this item is below, by default"/>
+    <dashboard-row>
+        <dashboard-box title="Let's start a row instead"/>
+        <dashboard-box color="lightgreen">
+            <dashboard-box title="You can have boxes inside boxes..."/>
+            <dashboard-box title="...and they'll start..."/>
+            <dashboard-box title="...grouping by column again!"/>
+        </dashboard-box>
+        <dashboard-box>
+            <dashboard-box title="Since that's the default"/>
+            <dashboard-box title="And boxes don't need colors"/>
+            <dashboard-box color="coral" border-color="orangered">
+                <dashboard-box title="Or titles."/>
+            </dashboard-box>
+        </dashboard-box>
+    </dashboard-row>
+</dashboard-box>
+
+<dashboard-row>
+    <dashboard-box title="A Clear Box"/>
+    <dashboard-box title="A Not-So-Clear Box" color="aqua"/>
+    <dashboard-box title="A Box with a Border" border-color="black"/>
+</dashboard-row>
+
+<dashboard-box title="A More Practical Example" border-color="black">
+    <dashboard-box title="Control Panel" border-color="gainsboro">
+        <command-input/>
+    </dashboard-box>
+
+    <dashboard-row>
+        <dashboard-box title="Warnings" color="lightyellow" border-color="yellow">
+            <event-list filter-text="WARNING"/>
+        </dashboard-box>
+        <dashboard-box title="Errors" color="salmon" border-color="red">
+            <event-list filter-text="FATAL"/>
+        </dashboard-box>
+    </dashboard-row>
+</dashboard-box>
+
+<dashboard-box title="Channel Overview">
+    <channel-table
+    fields="'Last Sample Time' 'Channel Id' 'Channel Name' 'Channel Value'"
+    filter-text=""
+    items-shown="cmdDisp.CommandsDispatched"
+    compact/>
+</dashboard-box>
+
+<dashboard-box title="You can pass in space-separated lists to do things" border-color="black">
+    <dashboard-row>
+        <dashboard-box title="...like only showing certain columns">
+            <event-list fields="'Event Name' 'Event Description'"/>
+        </dashboard-box>
+        <dashboard-box title="...or picking out specific channels">
+            <channel-table items-shown="pingRcvr.PR_NumPings sendBuffComp.PacketsSent"/>
+        </dashboard-box>
+    </dashboard-row>
+</dashboard-box>

@@ -1,0 +1,51 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=Component] (0) at (-11.5, 3.5) {PhsyicalSensor1};
+		\node [style=Component] (1) at (-11.5, 1) {PhysicalSensor2};
+		\node [style=Component] (2) at (-11.5, -1.5) {PhysicalSensor3};
+		\node [style=Component] (3) at (-2.5, 1) {Generic Reelay Sensor};
+		\node [style=Component] (4) at (8.25, 1.5) {ReelayMonitor};
+		\node [style=Port] (5) at (-6.25, 1.75) {};
+		\node [style=Port] (6) at (-6.25, 1) {};
+		\node [style=Port] (7) at (-6.25, 0.25) {};
+		\node [style=Port] (9) at (1.25, 1.5) {};
+		\node [style=Port] (13) at (11, 1.5) {};
+		\node [style=none] (17) at (3.5, 2.25) {ReelayEvent};
+		\node [style=Port] (19) at (-0.75, -0.25) {};
+		\node [style=Port] (20) at (-1.5, -0.25) {};
+		\node [style=Component] (27) at (7.75, -2) {Sensor Conusmers};
+		\node [style=Port] (28) at (0, -0.25) {};
+		\node [style=Port] (29) at (4.5, -1.25) {};
+		\node [style=Port] (30) at (4.5, -2) {};
+		\node [style=Port] (31) at (4.5, -2.75) {};
+		\node [style=none] (32) at (0.75, -1.25) {};
+		\node [style=none] (33) at (1, -2) {};
+		\node [style=none] (34) at (1, -2.75) {};
+		\node [style=none] (35) at (0.25, -2) {};
+		\node [style=none] (36) at (-0.75, -1) {};
+		\node [style=none] (37) at (-1.5, -2) {};
+		\node [style=none] (38) at (-0.75, -2.75) {};
+		\node [style=none] (39) at (13.75, 1.5) {};
+		\node [style=Port] (40) at (-8.75, 3.5) {};
+		\node [style=Port] (41) at (-8.75, 1) {};
+		\node [style=Port] (42) at (-8.75, -1.5) {};
+		\node [style=none] (44) at (12.75, 2.25) {Verdict};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=GenericArrow, in=180, out=0] (9) to (4);
+		\draw [style=UARTLine] (38.center) to (34.center);
+		\draw [style=UARTLine] (20) to (37.center);
+		\draw [style=UARTLine, bend right=45, looseness=1.75] (37.center) to (38.center);
+		\draw [style=UARTLine, bend right=45, looseness=1.75] (36.center) to (35.center);
+		\draw [style=UARTLine] (19) to (36.center);
+		\draw [style=UARTLine] (35.center) to (33.center);
+		\draw [style=UARTArrow] (33.center) to (30);
+		\draw [style=UARTArrow] (34.center) to (31);
+		\draw [style=UARTArrow] (32.center) to (29);
+		\draw [style=UARTLine, bend right=45, looseness=1.25] (28) to (32.center);
+		\draw [style=GenericArrow] (13) to (39.center);
+		\draw [style=UARTArrow] (40) to (5);
+		\draw [style=UARTArrow] (42) to (7);
+		\draw [style=UARTArrow] (41) to (6);
+	\end{pgfonlayer}
+\end{tikzpicture}

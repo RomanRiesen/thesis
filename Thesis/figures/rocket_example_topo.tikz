@@ -1,0 +1,46 @@
+\begin{tikzpicture}
+	\begin{pgfonlayer}{nodelayer}
+		\node [style=Component] (0) at (-16.5, 4) {rocketSimulator};
+		\node [style=Component] (1) at (-7, 4) {reelayRocketSensor};
+		\node [style=Component] (2) at (1.5, 4) {reelayMonitor};
+		\node [style=none] (4) at (-12.25, 2) {};
+		\node [style=none] (5) at (-12.25, 6) {};
+		\node [style=none] (6) at (-8, 6) {};
+		\node [style=none] (7) at (-8, 5.25) {};
+		\node [style=none] (9) at (-16.5, 4) {};
+		\node [style=none] (10) at (-15, 2) {};
+		\node [style=none] (11) at (-5, 2) {};
+		\node [style=none] (12) at (-2.75, 2) {};
+		\node [style=none] (13) at (-2.75, 6) {};
+		\node [style=none] (14) at (0.5, 6) {};
+		\node [style=none] (15) at (0.5, 5.25) {};
+		\node [style=Port] (16) at (0.5, 5) {};
+		\node [style=Port] (18) at (-8, 5) {};
+		\node [style=Component] (20) at (-16.5, 8) {simulationRateGroup};
+		\node [style=Component] (21) at (-7, 8) {reelaySensorRateGroup};
+		\node [style=Port] (22) at (-7, 5) {};
+		\node [style=Port] (23) at (-16.5, 5) {};
+		\node [style=Port] (24) at (-15, 3) {};
+		\node [style=Port] (25) at (-5, 3) {};
+		\node [style=Port] (26) at (3, 3) {};
+		\node [style=none] (27) at (3, 2) {};
+		\node [style=none] (28) at (4, 2) {};
+		\node [style=none] (29) at (5, 2) {Verdict};
+	\end{pgfonlayer}
+	\begin{pgfonlayer}{edgelayer}
+		\draw [style=GenericLine] (10.center) to (4.center);
+		\draw [style=GenericLine] (4.center) to (5.center);
+		\draw [style=GenericLine] (5.center) to (6.center);
+		\draw [style=GenericArrow] (6.center) to (7.center);
+		\draw [style=GenericArrow] (14.center) to (15.center);
+		\draw [style=GenericLine] (11.center) to (12.center);
+		\draw [style=GenericLine] (12.center) to (13.center);
+		\draw [style=GenericLine] (13.center) to (14.center);
+		\draw [style=GenericArrow] (20) to (23);
+		\draw [style=GenericArrow] (21) to (22);
+		\draw (26) to (27.center);
+		\draw [style=GenericArrow] (27.center) to (28.center);
+		\draw [style=GenericLine] (25) to (11.center);
+		\draw [style=GenericLine] (24) to (10.center);
+	\end{pgfonlayer}
+\end{tikzpicture}

@@ -1,0 +1,6 @@
+rocketSimulator.height
+rocketSimulator.SpeedDoppler
+rocketSimulator.SpeedIntegrated
+rocketSimulator.acceleration
+rocketSimulator.exhaustVelocity
+rocketSimulator.remaining_fuel
