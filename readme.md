@@ -11,26 +11,35 @@ Inside the `ReelayComponents` folder is another `readme.md` that contains instru
 # Run the Example
 
 Prerequisites:
+
     1. Docker installed and the docker daemon running
     2. Git installed
     3. at least 4 GB of empty storage space
 
 To run the example first clone this repository to your machine:
 
-    `git clone --recurse-submodules {repository_url}` 
+```bash
+git clone --recurse-submodules {repository_url}
+```
 
 Then cd into the cloned directory:
 
+```bash
     cd {repository_name}
+```
 
 Now run
 
-    `docker build -t "fprime_with_reelay" .` 
+```bash
+    docker build -t "fprime_with_reelay" .
+```
 
 to construct the docker image, which will take a few minutes (easily ten or more). The resulting image will als be pretty big at around 2.5 GB.
 After the successful completion of the image generation we can run it:
 
-    `docker run -it -p 5000:5000 fprime_with_reelay`
+```bash
+    docker run -it -p 5000:5000 fprime_with_reelay
+```
 
 Now we should be able to navigate to 127.0.0.1:5000 in a web browser and then see the fprime ground station.
 
