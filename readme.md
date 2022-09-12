@@ -7,25 +7,24 @@ Here I will give an overview of how to run the example deployment in the provide
 Inside the `ReelayComponents` folder is another `readme.md` that contains instructions of how to use the constructed components in an F' deployment.
 
 
-
 # Run the Example
 
 Prerequisites:
 
-    1. Docker installed and the docker daemon running
-    2. Git installed
-    3. at least 4 GB of empty storage space
+1. Docker installed and the docker daemon running
+2. Git installed
+3. at least 6 GB of empty storage space (I'm sorry!)
 
 To run the example first clone this repository to your machine:
 
 ```bash
-git clone --recurse-submodules {repository_url}
+git clone --recurse-submodules github.com/RomanRiesen/thesis
 ```
 
 Then cd into the cloned directory:
 
 ```bash
-    cd {repository_name}
+    cd thesis
 ```
 
 Now run
@@ -41,7 +40,7 @@ After the successful completion of the image generation we can run it:
     docker run -it -p 5000:5000 fprime_with_reelay
 ```
 
-Now we should be able to navigate to 127.0.0.1:5000 in a web browser and then see the fprime ground station.
+Now you should be able to navigate to 127.0.0.1:5000 in a web browser and then see the fprime ground station.
 
 You can now, for example, click on the tab `Charts`, then in the top-right click on `Load` to load the `rocket_charts.txt` chart definitions from `components_example/Ref/`. This will load a few charts. Then go over to the `Commanding` tab, click the drop-down, search for `toggle` and execute the command `rocketSimulation.TOGGLE_SIMULATION()`. Now you can observe the rocket simulation values in the `Charts` tab and the events generated from the monitor inside the
 `Events` tab.
