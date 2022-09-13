@@ -20,14 +20,20 @@ namespace ReelayComponents
       ReelayMonitor(
           const char *const compName) : ReelayMonitorComponentBase(compName)
   {
-    //monitor_options = reelay::dense_timed<time_t>::monitor<input_t, output_t>::options()
+
+    //construct the appropriate monitor options
+    #if USE_DISCRETE_TIMED == 1
+    monitor_options = reelay::discrete_timed<time_t>::monitor<input_t, output_t>::options()
       //.with_time_field_name("time")
-      //.with_value_field_name("verdict");
+      //.with_condensing(true)
+      .disable_condensing()
+      .with_value_field_name("verdict");
+    #else
     monitor_options = reelay::dense_timed<time_t>::monitor<input_t, output_t>::options()
-      //.disable_condensing()
       //.with_interpolation()
       .with_time_field_name("time")
       .with_value_field_name("verdict");
+    #endif
   }
 
   void ReelayMonitor ::
@@ -48,6 +54,7 @@ namespace ReelayComponents
     std::string prop = property.toChar();
     try
     {
+      //from the property string, construct a monitor
       mon = reelay::make_monitor(prop, monitor_options);
     }
     catch (const std::exception &exception)
@@ -105,36 +112,39 @@ namespace ReelayComponents
 
     Fw::Time t = this->getTime();
     F32 ms = t.getSeconds() * 1000 + t.getUSeconds() / 1000;
-    
-    // add time field to json message if not present
+
+    //add time field to json message if not present
     if (!msg.contains("time"))
     {
       msg["time"] = ms;
     }
 
-    std::cout << "msg" << msg.dump() << std::endl;
+    std::cout << "event: " << msg.dump() << std::endl;
 
     bool all_positive = true;
     // iterate over all properties and check if they are satisfied by the event
     for (auto &it : properties)
     {
-      uint32_t property_id = it.first;
-      ReelayProperty::propertyString property_string = it.second.first.c_str();
-      ReelayProperty violated_property(property_string, property_id);
-      //get the verdict (array) from the monitor
-      auto result_json_vec = it.second.second.update(msg);
 
-      std::cout << "result vec : " << result_json_vec << std::endl;
+      uint32_t property_id = it.first;
+
+      //get the verdict (array) from the monitor
+      auto verdict = it.second.second.update(msg);
+      std::cout << "verdict : " << verdict << std::endl;
+
+      #if USE_DISCRETE_TIMED == 1
 
       // in the case of a discrete monitor the verdict is a simple bool
-      //bool result = result_json_vec["verdict"];
+      bool result = verdict["verdict"];
 
-      // in the case of a dense monitor the verdict is a list of times and verdicts
+      #else
+
+      //in the case of a dense monitor the verdict is a list of times and verdicts
       bool result = true;
-      if (!result_json_vec.empty())
+      if (!verdict.empty())
       {
         //each segment represents a point in time in which a change happened
-        for (const auto& s : result_json_vec)
+        for (const auto& s : verdict)
         {
           std::cout << s.dump() << std::endl;
           bool this_result = s["verdict"].get<bool>(); 
@@ -143,6 +153,9 @@ namespace ReelayComponents
         }
       }
 
+      #endif
+
+
       //always output the simple bool verdict
       if (this->isConnected_verdictOutBool_OutputPort(0))
         this->verdictOutBool_out(0, result);
@@ -150,6 +163,8 @@ namespace ReelayComponents
       if (!result /*&& !only_log_negative_verdicts*/)
       {
         all_positive = false;
+        ReelayProperty::propertyString property_string = it.second.first.c_str();
+        ReelayProperty violated_property(property_string, property_id);
         this->log_ACTIVITY_HI_NEGATIVE_VERDICT(violated_property);
       }
     }

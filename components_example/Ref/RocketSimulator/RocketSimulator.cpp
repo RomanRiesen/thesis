@@ -126,8 +126,8 @@ namespace Ref {
 
     F32 v_Delta = std::abs(speedI-speedD);
 
-    // Send current values to output ports
-    //FIXME crashes!!!
+    // Send current values to output ports for the generic sensor
+    /*
     if (
       this->isConnected_height_OutputPort(0)
       || this->isConnected_speedD_OutputPort(0)
@@ -142,6 +142,7 @@ namespace Ref {
       this->stage_out(0, stage_str);
       this->height_out(0, real_h);
     }
+    */
 
     if (this->isConnected_all_values_OutputPort(0))
       this->all_values_out(0, speedI, v_Delta, exhaustVelocity, stage, real_h);

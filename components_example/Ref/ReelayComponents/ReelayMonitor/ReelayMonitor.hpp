@@ -19,6 +19,9 @@
 #include <chrono>
 #include <stdlib.h>
 
+//Whether to use dense or discrete timed monitors (1 = discrete, 0 = dense)
+#define USE_DISCRETE_TIMED 1
+
 namespace ReelayComponents {
 
   using input_t = reelay::json;
@@ -31,7 +34,13 @@ namespace ReelayComponents {
   {
 
     std::unordered_map<U32, std::pair<std::string, ReelayMonitorType>> properties = {};
+
+    #if USE_DISCRETE_TIMED == 1
+    reelay::discrete_monitor_options<time_t, input_t, output_t> monitor_options;
+    #else
     reelay::dense_monitor_options<time_t, input_t, output_t> monitor_options;
+    #endif
+
     bool only_log_negative_verdicts = false;
 
     public:

@@ -1,7 +1,7 @@
 ---
 title: On Integrating Runtime Verification in F' Architectures
 author: Roman Riesen
-date: 8.8.2022
+date: 8.9.2022
 geometry: a4paper
 bibliography: bib.bib
 csl: transactions-on-parallel-computing.csl
@@ -15,9 +15,12 @@ documentclass:
 header-includes:
     - \usepackage{hyperref}
     - \usepackage{tikz}
+    - \usepackage{tikzit}
     - \usetikzlibrary{shapes.multipart}
     - \usepackage[backend=biber,style=numeric, backref=true]{biblatex}
+    - \usepackage{pdfpages}
     - \bibliography{bib}
+    - \input{box.tikzstyles}
 ---
 
 \begin{titlepage}  
@@ -93,7 +96,10 @@ state/.style={
 }
 \end{center}
 
-Reliability and safety requirements are especially pronounced in the case of aerospace, robotic, and other critical systems. Space software, in particular, has historically enjoyed prime applications of formal methods. Such software is carefully designed, implemented, and verified against requirements before launch and deployment. Runtime verification is a flight-proven, lightweight method based on observing information from a system while in operation, and identifying if observed behaviors satisfy or violate certain requirements. It scales well in complex systems, and verdicts of monitored requirements may also be used for control decisions throughout the system operation. However, applications of runtime verification within space software have largely been residing at the implementation level. In this thesis, we investigate the development of runtime verification support at the architectural level. We specifically target JPL's F', a framework enabling rapid development and deployment of spaceflight and other embedded software applications. We follow a principled approach, with the overall goal to enable existing F' systems to integrate monitoring of requirements expressed as temporal logic statements in a reusable manner. We illustrate runtime verification over a rocket model, and outline design decisions as well as supporting implementation adopting Metric Temporal Logic for specification and Reelay monitors for verification.
+Reliability and safety requirements are especially pronounced in the case of aerospace, robotic, and other critical systems. Space software, in particular, has historically enjoyed prime applications of formal methods. Such software is carefully designed, implemented, and verified against requirements before launch and deployment. Runtime verification is a flight-proven, lightweight method based on observing information from a system while in operation, and identifying if observed behaviors satisfy or violate certain requirements. It scales well in complex systems, and verdicts of monitored requirements may also be used for control decisions throughout the system operation. However, applications of runtime verification within space software have largely been residing at the implementation level.
+
+
+In this thesis, we investigate the development of runtime verification support at the architectural level. We specifically target JPL's F', a framework enabling rapid development and deployment of spaceflight and other embedded software applications. We follow a principled approach, with the overall goal to enable existing F' systems to integrate monitoring of requirements expressed as temporal logic statements in a reusable manner. We illustrate runtime verification over a rocket model, and outline design decisions as well as supporting implementation adopting Metric Temporal Logic for specification and Reelay monitors for verification.
 
 \newpage
 
@@ -170,15 +176,21 @@ In the taxonomy of software engineering research laid out by [@shawWhatMakesGood
 [related_work]:
 
 
-## !!! Related Work
+## Related Work
+
+We could not find previous work that deals with the architectural aspects of reusable runtime verification. If it has it was mostly about achieving high-performance in an embedded context and thus there is much focus on generating monitors in either hardware specification language or very fast C [@nassarNUVAArchitecturalSupport2015] [@CopilotHome] [@schumannRuntimeAnalysisR2U22016][@zhengRealTimeSimulationSupport2017]. Or on improving reliability in the context of web services [@caoAutomatedRuntimeVerification2010] [@newcombeHowAmazonWeb2015]. Neither of which is fitting for our target of relatively high-performance embedded systems, such as those using ARM cortex chips [ArmCortexM4Processor] or similar.
+
+In regards to implementing Runtime Verification in flight systems with small-to-medium scope, there is some work done by students [@hertzIntegratingRuntimeVerification2021] and older work by bigger teams [@goldbergRuntimeVerificationAutonomous2005].
+So we focus here on alternatives to the individual tools used in this thesis, namely alternative flight-software or embedded-systems frameworks or runtime verification libraries.
 
 Reelay, which is adopted in this thesis as the underlying verification engine is similar to R2U2 [@schumannRuntimeAnalysisR2U22016]. Thanks to its inclusion of bayesian networks TL properties can be more involved whilst still allowing to conclude the origin of the error. 
 
 If one were to use MagicDraw [@MagicDrawCATIADassault] with the SysML plug-in one can generate F' topologies in a diagramming software. Therefore this approach might superficially be a similar experience to using Simulink [@SimulinkSimulationModelBased]. Both approaches are closed-source in nature and might thus not be applicable or desirable under certain circumstances. And using Simulink to generate F' Components might still require significant engineering effort, but might be an avenue worth exploring in future research. One downside of both these graphical approaches is the lack of suitability to commonly used version control systems of the underlying files.
 
+Copilot is a language that enables hard-realtime verification and allows the formulation of specifications using a domain specific language based on haskell [@CopilotHome].
+
 There are many more tools not explicitly listed here but which might be worth one's consideration for FSW development [@caldwellSmallSpacecraftAvionics2021]. Many of the other solutions seem to lack the popularity and momentum of F'. And many of the tools developed by NASA can be seen as predecessors to F' but lack the cohesion and tools it provides.
 
-In regards to implementing Runtime Verification in flight systems with small-to-medium scope, there is some work done by students [@hertzIntegratingRuntimeVerification2021] and older work by bigger teams [@goldbergRuntimeVerificationAutonomous2005].
 
 
 
@@ -191,14 +203,16 @@ In regards to implementing Runtime Verification in flight systems with small-to-
 
 ## Motivating Example
 
+\label{rocket_example_introduction}
+
 As an example application, we will consider a simple rocket model of which we will build an F' component, simulating possible sensor outputs. We then consider a few properties that one might verify in a real system. The numbers and details chosen are in line with typical student competition rockets such as in [@hertzIntegratingRuntimeVerification2021].
 
  The simulation is based on the classic Tsiolkovsky rocket equation[@ManEquationRocket] with random error terms applied - simulating measurement errors or differences from the theoretical ideal of the system - so that the system may violate the defined properties. Pressure effects are ignored.
 
  The rocket has an accelerometer measuring acceleration ($a_m$), burn rate ($b$), fuel weight ($m_f$), exhaust velocity ($v_e$), and weight of the empty rocket ($m_0$). We also assume there is a ground station system that can measure the velocity of the rocket (via the doppler effect). This velocity we will call ($v_d$).
- The status of the rocket is one of "prelaunch", "firstStage", "secondStage", "descent", "landed".
+ The stage of the rocket is one of "Prelaunch", "FirstStage", "SecondStage", "Descent", "Landed".
 
- We also let $E_a, E_d, \epsilon_b$ be independently normally distributed random variables with mean 0 and variance $\sigma_a, \sigma_d, \sigma_b$, respectively. The first two random variables represent the variance of measurement of the accelerometer, of the ground-to-rocket doppler-effect measurement. The last variable is the variance of the burn rate of the engine.
+ We also let $E_a, E_d, \epsilon_b$ be independently normally distributed random variables with mean 0 and standard deviation $\sigma_a, \sigma_d, \sigma_b$, respectively. The first two random variables represent the variance of measurement of the accelerometer and of the ground-to-rocket doppler-effect measurement. The last variable is the variance of the burn rate of the engine.
 
  The Tsiolkovsky rocket equation formulates the force on the rocket at a point in time ($t$) by the change of mass (fuel) multiplied by the exhaust velocity multiplied by the current rocket mass:
 
@@ -214,9 +228,9 @@ As an example application, we will consider a simple rocket model of which we wi
 
  In the scenario presented, a system designer may be interested in checking if certain requirements hold at runtime, when the rocket system is in operation. For our purposes we will consider the following properties:
 
- - The status must start at "prelaunch" and after that increase in order
- - 10 seconds after firstStage the burnrate must be more than $20 kg/s$
- - The difference between $v_I$ and $v_d$ should always be less than $1 m/s^2$ when the status is either `firstStage` or `secondStage`
+ - The stage must start at "Prelaunch" and after that increase in order
+ - 1 second after FirstStage the burnrate must be more than $1800 kg/s$
+ - The difference between $v_I$ and $v_d$ should always be less than $1 m/s^2$ when the stage is either `FirstStage` or `SecondStage`
 
 \begin{figure}[h]
 \centering
@@ -305,8 +319,6 @@ would declare a warning event of high severity and two values, and in the ground
 F' provides a ground data system (GDS) that allows the dispatching of commands and displaying of telemetry received. GDS supports creating a dashboard - a custom GUI layout - from predefined GUI components, which are intended to give a quick overview of the data available to the GDS from a running embedded system [@GDSDashboardComponent].
 The GDS is implemented using web technologies and opens a web interface on the ground station computer thus it can run on the same computer as the F' deployment or on a separate one.
 
-!!! add image
-
 ### FPP
 
 FPP is a modeling language that compiles to XML and C++ and has a more succinct syntax compared to writing the component and topology specifications by hand in either XML or C++[@HomeFprimecommunityFpp]. Thus FPP furthers the main goals of rapid development of the F' ecosystem. Its parser also has better error reporting than the XML parser.
@@ -371,6 +383,9 @@ As algorithms for determining satisfiability of linear complexity in formula siz
 
 Much later on TLA^+ was developed by Leslie Lamport, which builds on top of first order logic and set theory, thus being much more expressive than the other logics treated here. This system is widely used in industry [@aitameurAbstractStateMachines2014].
 
+
+\newpage
+
 \label{LTL}
 
 ### LTL
@@ -408,13 +423,13 @@ The goal of runtime verification is to specify the desired behavior of a system 
 - *Polarity* of a specification is whether it captures a state that is allowed or not allowed. For example, " "The difference between the integrated speed and the speed measured by doppler effect exceeds 1m/s" has negative polarity as it specifies a state that is not allowed. We will assume positive polarity in this thesis.
 
 
-### !! Reelay
+### Reelay
 
 Reelay is a library that provides runtime monitors for past metric temporal logic (pmtl) [@ulusOnlineMonitoringMetric2019].
 It enables the efficient monitoring of dense time metric logic by using a non-pointy (based on durations) definition.
 One of the reasons for the achieved performance is the omission of future-time operators as they were introduced in \href{#LTL}{LTL}. Thus only statements about the past are possible. 
 
-The Reelay monitor can either be discrete or dense. In the discrete case the total order mentioned previously is the only notion of time available. But in the dense case a `time` variable is expected to be part of the trace. The value of that variable may correspond to physical units such as milliseconds (the unit we chose for our implementation).
+The Reelay monitor can either be discrete or dense. In the discrete case the total order mentioned previously is the only notion of time available. But in the dense case a `time` variable is expected to be part of the trace. The value of that variable may correspond to physical units such as milliseconds (the unit we chose for our implementation). When using a dense monitor the output of the monitor isn't a single boolean value but a set of results as the verdict may change multiple times between two measurement time points [@ulusReelayMonitors2022].
 
  The pre-defined temporal operators are:
 
@@ -423,25 +438,20 @@ The Reelay monitor can either be discrete or dense. In the discrete case the tot
 +---------------------------+--------------------+-----------------------------------------------------------------------+
 | `once {A}`                | `P {A}`            |   Property `{A}` was true in at least one point in time (t < now)     |
 +---------------------------+--------------------+-----------------------------------------------------------------------+
-| `once[t0:t1] {A}`         | `P[t0:t1] {A}`     |   Property `{A}` at least once true in the specified time             |
+| `once[t0:t1] {A}`         | `P[t0:t1] {A}`     |   Property `{A}` at least once true in between now-t0 and now-t1      |
 +---------------------------+--------------------+-----------------------------------------------------------------------+
 | `historically {A}`        | `H {A}`            | {A} true at all times in the past                                     |
 +---------------------------+--------------------+-----------------------------------------------------------------------+
-| `historically[t0:t1] {A}` | `H[t0:t1] {A}`     | {A} true at all points between t0 and t1                              |
+| `historically[t0:t1] {A}` | `H[t0:t1] {A}`     | {A} true at all points between now-t0 and now-t1                      |
 +---------------------------+--------------------+-----------------------------------------------------------------------+
 | `{A} since {B}`           | `{A} S {B}`        | true if {A} always true since {B}                                     |
 +---------------------------+--------------------+-----------------------------------------------------------------------+
-| `{A} since[t0:t1] {B}`    | `{A} S[t0:t1] {B}` | true if {A} always true since {B} was true between t0 and t1          |
+| `{A} since[t0:t1] {B}`    | `{A} S[t0:t1] {B}` | true if {A} always true since {B} was true between now-t0 and now-t1  |
 +---------------------------+--------------------+-----------------------------------------------------------------------+
 
-Where `t0`, `t1` are time bounds that can be omitted to get unbounded expressions.
-
-`{A}` and `{B}` are atoms. 
+Where `t0`, `t1` are time bounds that can be omitted to get unbounded expressions and `{A}` and `{B}` are atoms. Now is the current time.
 
 The monitoring is implemented using sequential networks as opposed to the more commonly used approaches of rewriting rules or büchi-automata.
-
-!!! give quick overview of bdd and the transformation and the issues with future temporal logic and pointy mtl
-
 
 
 ### RYE-format
@@ -450,28 +460,29 @@ RYE is the format used by Reelay for the specification of the properties to be v
 Atoms evaluate to either `true` or `false` but they can be constructed more expressively than in propositional logic.
 The types of atoms allowed in the Rye are boolean literals, numerical comparisons, and string equality. The operations of propositional logic `not`, `and`, `or`, and `->` behave as usual.
 
+\label{rye_properties}
+
 A few properties of our rocket example expressed in RYE are:
 
- - The status must start at "prelaunch" and after that increase in order
+ - P1: The stage must start at "Prelaunch" and after that increase in order
 
-```
-{{{status = "firstStage"}    since not {status = "prelaunch"}}
-or {{status = "secondStage"} since not {status = "firstStage"}}
-or {{status = "descent"}     since not {stage = "secondStage"}}
-or {{status = "landed"}      since not {stage = "descent"}}}
-```
-
- - 10 seconds after ignition the burnrate must be more than $20 kg/s$
-
-```
- {burnrate > 10 since[10:0] {status = "firstStage"}}
+```javascript
+({stage: 'FirstStage'}    since not {stage: 'Prelaunch'})
+or ({stage: 'SecondStage'} since not {stage: 'FirstStage'})
+or ({stage: 'Descent'}     since not {stage: 'SecondStage'})
+or ({stage: 'Landed'}      since not {stage: 'Descent'})
 ```
 
- - The difference between $v_I$ and $v_d$ should always be less than $1 m/s^2$ during `firstStage` and `secondStage`. Because Reelay formulas do not support arithmetic operations we have to provide the absolute difference manually, we'll call it `speedDelta`, which we can then use:
+ - P2: 1 second after ignition the burnrate must be more than $1800 kg/s$
 
+```javascript
+{burnrate > 1800} since[0:1000] {stage: 'FirstStage'}
 ```
-{{stage = "firstStage"} or {stage = "secondStage"}} -> {speedDelta < 1}
-    or {stage="secondStage"}
+
+ - P3: The difference between $v_I$ and $v_d$ should always be less than $1 m/s^2$ during `FirstStage` and `SecondStage`. Because Reelay formulas do not support arithmetic operations we have to provide the absolute difference manually, we'll call it $v_\Delta$, which we can then use:
+
+```javascript
+({stage: 'FirstStage'} or {stage: 'SecondStage'}) -> {v_Delta < 10}
 ```
 
 
@@ -479,9 +490,9 @@ For the verification to happen we of course need some data. Reelay has chosen th
 
 ```Json
 {
-   "time": 300, "burnrate": 11.582, "speedI": 100.394,
-   "speedD": 100.167, "speedDelta": 0.227, "status": "firstStage"
-}`
+   "time": 577495296, "burnrate": 2000, "v_I": 702.41217,
+   "v_Delta": 5.256469, "stage": "FirstStage"
+}
 ```
 
 Note that if the monitor is chosen to be discrete-time, the time field is not needed and the temporal intervals correspond to the number of events passed.
@@ -536,12 +547,12 @@ Before diving into the details of both `ReelaySensor` and `ReelayMonitor` we wil
         \nodepart{four} {\bf Commands:\\}
         };
     \end{tikzpicture}
-    \caption{ReelaySensor Component Diagram}
+    \caption{A Pull-Based, Static ReelaySensor Component Diagram}
     \label{fig:reelayStaticSensor}
 \end{figure}
 
 
-The `ReelaySensor` is most naturally represented by a `queued` component, which emits events on a schedule set by a `rateGroupDriver`. These events contain the most up-to-date data of all the actual sensors for which this `ReelaySensor` instance is responsible. But as both `queued` and `active` components add quite significant overhead to the complexity of the system, their use is discouraged on bare-metal. We will use a `passive` component to maximize the usefulness of our provided components.
+The `ReelaySensor` is most naturally represented by a `queued` component, which emits events on a schedule set by a `rateGroupDriver`. These events contain the most up-to-date data of all the actual sensors for which this `ReelaySensor` instance is responsible. But as both `queued` and `active` components add quite significant overhead to the complexity of the system, their use is discouraged on bare-metal. We will use a `passive` component to maximize the usefulness of our provided components. Further, thanks to *persistence* of the monitors provided by Reelay we don't have to accumulate the values in the `ReelaySensor` and can simply emit events even if they might not contain all the values.
 
 In regards to the `ReelaySensor` there are two approaches discussed and one implemented in the finalized topology example:
 
@@ -551,7 +562,7 @@ In regards to the `ReelaySensor` there are two approaches discussed and one impl
 Version (1) has the advantage of being more reusable at the cost of being type-safe. It is less safe because a discrepancy between the topology definition and the runtime setting of the port types can lead to garbage data being sent to the `ReelayMonitor`. Also one has to ignore the warnings about ports not being connected if there are fewer input ports than the specified number as there is no documented way to parametrically specify the number of ports of a component instantiation in FPP (or XML). This approach will be discussed later on in \ref{genericSensor}.
 The main issue with the `ReelayStaticSensor` is that one has to create a new F' component for every kind of `PhysicalSensor` one wants to use because the connections need matching port types on both ends. Therefore this version requires a new type of sensor for each kind of input one wishes to monitor, but it offers compile-time safety.
 
-There is also the question of which component has the output port and which one has the input port. If the `ReelaySensor` has the input port we call it 'push based' as the component representing the physical sensor will have to invoke the port for data to travel to the `ReelaySensor`. On the other hand, if the port on the `ReelaySensor` is an output port that has a return value, declared in FPP along the lines of `output port get_data() -> SensorData`, then we call it pull-based as the `ReelaySensor` invokes the port to get the data. This differentiation is important because it determines which `schedIn` port determines the frequency of serializing the data; if the physical sensor has many more changes than we wish to forward to the monitor we can use the pull-based approach, however, if we wish to have every single change visible at the monitor we can use the push-based approach. Regarding these two design decisions we have the following two-by-two matrix:
+There is also the question of which component has the output port and which one has the input port. If the `ReelaySensor` has the input port we call it 'push based' as the component representing the physical sensor will have to invoke the port for data to travel to the `ReelaySensor`. On the other hand, if the port on the `ReelaySensor` is an output port that has a return value, declared in FPP along the lines of `output port get_data() -> SensorData`, then we call it pull-based as the `ReelaySensor` invokes the port to get the data. If the physical sensor has many more changes than we wish to forward to the monitor we can use the pull-based approach, however, if we wish to have every single change visible at the monitor we can use the push-based approach. Regarding these two design decisions we have the following two-by-two matrix:
 
 \begin{center}
 \begin{tabular}{c|c|l}
@@ -576,15 +587,20 @@ There is a third, somewhat trivial approach - generating the `ReelayEvents` dire
     {
         \nodepart[align=center]{one} {\bf ReelayMonitor}
         \nodepart{two} - properties\\
-        - monitor\_options
-        - monitors
+        - log\_positive\_verdicts : bool\\
+        - monitor\_options\\
+        - monitors\\
         \nodepart{three} {\bf Input Ports:} \\
             eventIn : [5] string\\
             newProperty : ReelayProperty \\
-            removeProperty :  \\
+            removeProperty : U32 \\
             time get timeGet \\
             {\bf Output Ports:} \\
-            verdictOut \\
+            verdictOut : ReelayVerdict\\
+            verdictOutBool : bool\\
+            {\bf C++ only methods:} \\
+            - add\_property\_impl(string, id, bool)
+            + add\_property(string, id) \\
         \nodepart{four} {\bf Events:} \\
             NO\_PROPERTY\_REGISTERED() \\
             INVALID\_PROPERTY\_STRING (property) \\
@@ -598,8 +614,8 @@ There is a third, somewhat trivial approach - generating the `ReelayEvents` dire
     \label{fig:reelayMonitor}
 \end{figure}
 
-
 This component contains the monitors provided by the Reelay library and manages the verification of properties. The verdict of which is then sent onwards to consumers, such as telemetry, components that are part of the control system, or by way of a `ReelaySensor` to other `ReelayMonitor` instances. 
+
 
 The `ReelayMonitor` C++ implementation has a method `add_property` which registers the formulas to be verified. This can be used at runtime or at instantiation time like this:
 
@@ -608,52 +624,66 @@ The `ReelayMonitor` C++ implementation has a method `add_property` which registe
     instance reelayMonitor: Ref.ReelayMonitor base id 0xE000\
         {
         phase Fpp.ToCpp.Phases.configComponents """
-            reelayMonitor.add_property("{{status: 'firstStage'} \
-                since not {status: 'Prelaunch'}}", 0);
+            reelayMonitor.add_property("{{stage: 'FirstStage'} \
+                since not {stage: 'Prelaunch'}}", 0);
             """
         }
 ```
 
-The `add_property` method takes a string containing a Reelay formula and an id which can be used to delete the corresponding property (the management of the `id`s is up to the user). The method takes the property provided as a string and constructs a dense-time Reelay monitor from it.
-The Reelay monitors used in our implementation are densely timed because the rate of verification is given from outside the component and might change at runtime. Therefore events need to have a `time` variable. If that is missing from the JSON event to the `ReelayMonitor` that component will add one in the unit of milliseconds as given by the special time port `timeGet`.
+The `add_property_impl` method takes a string containing a Reelay formula and an id which can be used to delete the corresponding property (the management of the `id`s is up to the user). The method takes the property provided as a string and constructs a dense-time Reelay monitor from it. The third argument of type `bool`, `added_at_runtime`, is set to `true` if the property has been added by the `newProperty` port implementation and is `false` when called from `add_property`, which is the method used by users at instantiation.
+The `ReelayMonitor` does emit a fatal-priority event if the registered formula is invalid but only if `added_at_runtime` is `false`. If the formula was added at runtime the `ReelayMonitor` will simply ignore it and log a high-priority error. This is done to avoid the system crashing, but to make it obvious as close to compile-time as possible that one of the properties defined is invalid.
 
+The Reelay monitors used in our implementation are densely timed because the rate of verification is given from outside the component and might change at runtime. Therefore events need to have a `time` variable. If that is missing from the JSON event to the `ReelayMonitor` that component will add one in the unit of milliseconds as given by the special time port `timeGet`. Because the dense time behaviour reelay would require stepping through each increase of the time value when updating a monitor we use dense time behaviour as that is more efficient when there are large jumps (around 100 steps) in the numerical value of time [@TemporalBehaviorsReelay]. And since we want milliseconds as our base unit, to enable a great range of update rates, large jumps in time are not uncommon, when chosing update rates of 10Hz or less.
+
+The difference between `verdictOut` and `verdictOutBool` is that the former supplies additional information about what property failed whilst the latter outputs `true` exactly if all properties registered on a monitor hold. The definition is as follows:
+
+```C++
+    port ReelayVerdictOut (
+        verdict : bool,
+        property_id : U32
+    )
+```
+
+The `property_id` is meaningless 
 
 The monitor does the following on an `eventIn` port invocation from another component:
 
-1. check if the event contains valid JSON, if not a high-priority event `INVALID_EVENT_STRING` is sent out
-2. if the JSON does not contain a `time` field, one is added based on the `getTime` port which corresponds to the Unix timestamp. This time is in milliseconds.
-3. check all properties individually if they are satisfied by the current values. If this is not the case a high-priority `NEGATIVE_VERDICT` event is sent out.
-4. if all properties are satisfied a low-priority `ALL_POSITIVE` event is sent out.
+1. Check if the event contains valid JSON, if not a high-priority event `INVALID_EVENT_STRING` is sent out
+2. If the JSON does not contain a `time` field, one is added based on the `getTime`. This time is in milliseconds.
+3. Check all properties individually if they are satisfied by the current values. Satisfy means here that no value from the verdict-list returned by the reelay monitor is `false`. If this is not the case a high-priority `NEGATIVE_VERDICT` event is sent out.
+4. If all properties are satisfied a low-priority `ALL_POSITIVE` event may be sent out if log_positive_verdicts is true. 
 
-The reason we have 5 `eventIn` ports is due to limitations concerning the F' string capacity discussed later in \ref{limitations}.
+The reason we have five `eventIn` ports is due to limitations concerning the F' string capacity discussed later in \ref{limitations}.
 
 
 ## Design Rationale
 
 To communicate with a component one can either send it a command or invoke one of its ports. The first approach is mostly used for manually giving inputs to the system or high-level scripting by use of command sequences. The second way is used for communication inside the system. As we are designing components for reuse the balance to strike in regards to how much of a component is controlled by commands as opposed to input ports is non-obvious. The downside of having too many commands in pre-made components is making the command selection in the ground station cluttered and as the components are kept generic the command names might not be very useful to the issuer of commands, which may result in user error with possibly dangerous results. End-users can create components receiving commands and issuing the corresponding message to the provided components over ports easily, the main downside being more components and a more complex topology to maintain. In our view the downsides of generically named commands that may be confused by users outweigh the introduction of a slight increase in complexity, thus our provided components only use ports as inputs.
 
-A similar issue exists in regards to communicating monitor verdicts from the `ReelayMonitor` to either other components or the GDS. One can have a telemetry port that sends the events directly to the ground station or an output port which communicates with other components. Relying only on the former approach has the downside that if such an verdict output port were not connected to a component communicating the violation of a property to the necessary places such errors might go entirely unnoticed during testing or simulation. This might prove catastrophic, later on.
-The downside of the former approach is that a lot of potentially unnecessary communication is created, resulting in wasted energy and a more busy ground station log. We used a hybrid approach of having both ports available. To avoid cluttering the logs the logging of positive verdicts can be turned off, but to avoid an error detected by RV to go unnoticed the logging of a negative verdict is always logged with high priority. In this we assume that the properties of the system are expressed positively; that is if the result is `true` the system is assumed to work as intended in regards to the property covered by RV.
+A similar issue exists in regards to communicating monitor verdicts from the `ReelayMonitor` to either other components or the GDS. One can have a telemetry port that sends the events directly to the ground station or an output port which communicates with other components. Relying only on the former approach has the downside that if such a verdict output port were not connected to a component communicating the violation of a property to the necessary places such errors might go entirely unnoticed during testing or simulation. This might prove catastrophic, later on.
+The downside of the former approach is that a lot of potentially unnecessary communication is created, resulting in wasted energy and a more busy ground station log. We used a hybrid approach of having both ports available. To avoid cluttering the logs the logging of positive verdicts can be turned off. But to avoid an error detected by RV going unnoticed the logging of a negative verdict is always logged with high priority. In doing so we assume that the properties of the system are expressed positively; that is if the result is `true` the system is assumed to work as intended in regards to the property covered by RV.
 
-The `ReelayMonitor` does throw an exception if the registered formula is invalid but only if it was added at instantiation. If the formula was added at runtime the `ReelayMonitor` will simply ignore it and log a high-priority error. This is done to avoid the system crashing, but to make it obvious as close to compile-time as possible that one of the properties defined is invalid.
-
-We use the dense-time behavior and do not provide an easy way to configure the options of the Reelay monitor used. One of the reasons for that decision is that verification behavior might change in unexpected ways when changing to discrete-time behavior and time losing any physical meaning. Therefore we chose to hide the monitor setting details.
+Whilst we thought about introducing a parameter to the property registration for a human-readable name (e.g. `speedDiffMaximum`) we decided against that because this can relatively easily be handled by an additional component managing the properties, therefoe we don't need to impose the costs of those strings onto all users of the `ReelayMonitor` component.
+We use the dense-time behavior and do not provide an easy way to configure the options of the Reelay monitor used. One of the reasons for that decision is that verification behavior might change in unexpected ways when changing to discrete-time behavior and the `time` variable might lose any physical meaning. Therefore we chose to hide the monitor setting details.
 
 ## Limitations
 
 \label{limitations}
 
 As F' is intended to be usable on memory-limited hardware it generally avoids allocations at runtime thus the type `Fw::String` has a statically allocated buffer with a default capacity of 256 bytes (which can be adjusted by changing the macro declaration `FW_FIXED_LENGTH_STRING`). A result of this limitation is that one has to take care that the total size of one JSON event (sent from `ReelaySensor` to `ReelayMonitor`) fits into that size.
-The solution would have been to implement an abstract FPP-type `JSON` to pass the data between the sensor and monitor. F' requires anything sent over ports to inherit from the `Fw::Serializable` abstract class. This in turn means that the serialized maximal size of the serialized JSON object would have to be known at compile time therefore simply increasing the limit (and decoupling it from the `Fw::String`'s capacity), not removing it entirely. But total overhead would be reduced by this approach as the JSON object would not have to be serialized and deserialized if not sent over special ports, therefore also enabling bigger properties to be sent.
+The solution would have been to implement an abstract FPP-type `JSON` to pass the data between the sensor and monitor. F' requires anything sent over ports to inherit from the `Fw::Serializable` abstract class. This in turn means that the serialized maximal size of the serialized JSON object would have to be known at compile time. Therefore even this more elaborate approach would simply increase the limit (and decouple it from the `Fw::String`'s capacity, lowering the overhead added by increasing the limit of all strings used), not remove it entirely. But since the serialization may be in a binary format, the size of the JSON object could be reduced compared to the same object in a string format.
 On the other hand, because Reelay monitors themselves use the nlohman JSON library [lohmannJSONModern2022], which was not developed with the same restraint of runtime allocations in mind as F', the monitors aren't suited to low-memory systems.
 
+As a compromise, we rely on Reelay's persistence to remember all values it ever saw and provide more ports to which the JSON strings can be sent (`eventIn`). This automatically multiplies the total length of a verifiable event by the number of ports provided (five in our case).
 
-## !!! Towards A Generic Sensor
+
+## Towards A Generic Sensor
 
 \label{genericSensor}
 
-Thus, as we have mentioned earlier, having a Generic Sensor would greatly ease the integration of our components into existing F' deployments. 
-The analogous issue of having a user-definable way of declaring the type of an argument or member is solved in C++ by templates or inheritance, those are both not currently understood by FPP. But there exist `serial` ports which can be connected to any other type of port. In theory, this enables the creation of a generic Sensor, however, the details are not documented and we lacked the time to reverse engineer the implementation, which would have been necessary to deserialize the data received by such ports. Thus this section has to be seen as an outline for future work.
+As we have mentioned earlier, having a reusable, generic ReelaySensor would greatly ease the integration of our components into existing F' deployments. This section describes such a component, but due to challenges faced during the implementation, we have not been able to fully realize it.
+The analogous issue of having a user-definable way of declaring the type of an argument or member is solved in C++ by templates or inheritance, those are both not currently understood by FPP. But there exist `serial` ports which can be connected to any other type of port.
+In theory, this enables the creation of a generic Sensor, however, the details are not documented and we lacked the time to reverse engineer the underlying format, which would have been necessary to deserialize the data received by such serial ports. Thus this section has to be seen as an outline for future work.
 
 \begin{figure}[h]
     \centering
@@ -666,6 +696,7 @@ The analogous issue of having a user-definable way of declaring the type of an a
         \nodepart{three} {\bf Input Ports:} \\
             serialIn : [10] serial
             {\bf Output Ports:} \\
+            serialIn : [10] serial
             reelayEventOut : reelayEvent
         \nodepart{four} {\bf Events:} \\
     };
@@ -681,14 +712,39 @@ An example instantiation of the generic Reelay sensor might look like this for r
 instance reelaySensor1: Ref.ReelayGenericSensor base id 0x0E200 \
    {
       phase Fpp.ToCpp.Phases.configComponents """
-        reelaySensor1.set_data_channel_name(0, "speedI", Ref::ReelayDataType::F32);
-        reelaySensor1.set_data_channel_name(1, "speedD", Ref::ReelayDataType::F32);
-        reelaySensor1.set_data_channel_name(2, "exhaustVelocity", Ref::ReelayDataType::F32);
+        reelaySensor1.set_data_channel_name(0, "v_I", Ref::ReelayDataType::F32);
+        reelaySensor1.set_data_channel_name(1, "v_Delta", Ref::ReelayDataType::F32);
+        reelaySensor1.set_data_channel_name(2, "burnrate", Ref::ReelayDataType::F32);
         reelaySensor1.set_data_channel_name(3, "stage", Ref::ReelayDataType::String);
         reelaySensor1.set_data_channel_name(4, "height", Ref::ReelayDataType::F32);
         """
    }
 ```
+
+This sets up 5 serial ports, one for each data channel. The data channel names are used to identify the data in the JSON object sent to the monitor. The data type is used to deserialize the data received by the serial port. The data type is an enum containing the allowed types:
+
+```C++	
+      enum ReelayDataType {
+         Bottom = 0,
+         F32,
+         Bool,
+         String,
+         ReelayEvent,
+      }
+
+   }
+```
+
+The bottom type is used to catch accidental default initializations of the data channel definitions. The `ReelayEvent` type is present to enable ReelaySensors to send events to other ReelaySensors, this might be useful if one wants to verify simple properties of a subset of a system's values with one monitor and more complex properties requiring the data of multiple sensors with another monitor, running at a lower rate.
+
+The output serial ports can be used to simplify the integration into existing systems. The data received by the serial ports can be forwarded to other, already existing components (*Sensor Consumers*). As illustrated by figure \ref{fig:genericSensorExample}, where the double dashed lines indicate `serial` port connections.
+
+\begin{figure}[h]
+    \centering
+    \ctikzfig{generic_sensor_diagram}
+    \caption{Generic Sensor Example}
+    \label{fig:genericSensorExample}
+\end{figure}
 
 ## Alternative designs
 
@@ -709,9 +765,9 @@ The monitor definition of the `ReelayMonitor` could be supplied at the FPP-compo
         }
 ```
 
-Whilst the performance overhead would be relatively minimal the complexity overhead for both the implementors (us) and the users was deemed too high. 
+Whilst the performance overhead would be relatively minimal the complexity overhead for both the implementors (us) and the users was deemed too high, therefore we abstained from implementing this feature.
 
-
+Another reasonable modification of the `ReelayMonitor` would have been to run the monitors at a fixed rate and not every time an `eventIn` port is invoked. This might reduce the overhead of the monitors, but would also reduce the usefulness of the monitors as they would not be able to react to events as they happen. In the worst case the verdict output would be delayed by the `rateGroup`'s schedule rate.
 
 
 \newpage
@@ -719,16 +775,7 @@ Whilst the performance overhead would be relatively minimal the complexity overh
 
 To show how the components interact and behave in an F' deployment we will show here the details of using the provided components to verify the properties of our rocket example.
 
-## Workflow
-
-The Workflow of monitoring an F' deployment is as follows:
-
-1. Specify the properties to be verified in natural language (e.g., the stages should increase monotonically).
-2. Generate the Reelay formulas from the natural language specifications.
-3. Determine where the necessary data originates and where it will be required; how many Monitors should there be? What kind of Reelay sensors should be used? Should the JSON events be created directly? Is there an opportunity to use temporal logic instead of ad-hoc methods for determining certain states?
-4. The result of (3) is a topology using our provided components to verify the specification from (1).
-
-## !!! Rocket Simulation component
+## Rocket Simulation component
 
 \begin{figure}[h]
     \centering
@@ -738,57 +785,221 @@ The Workflow of monitoring an F' deployment is as follows:
         \nodepart[align=center]{one} {\bf RocketSimulator}
         \nodepart{two} - rocket\_state\\
         \nodepart{three} {\bf Output Ports:} \\
-            rocketState : RocketState
+            rocketState : RocketStatePort
         \nodepart{four} {\bf Commands:} \\
             TOGGLE\_SIMULATION() \\
             {\bf Telemetry:} \\
-            height : F32 \\
+            v\_I: F32 id 0 \\
+            v\_Delta: F32 id 1 \\
+            burnrate: F32 id 2 \\
+            stage: RocketStage id 3 \\
+            height: F32 id 4 \\
+            remaining\_fuel: F32 id 5 \\
+            exhaust\_velocity: F32 id 6 \\
+            rocket\_time: F32 id 7 \\
     };
     \end{tikzpicture}
     \caption{RocketSimulator Component Diagram}
 \end{figure}
 
-As mentioned in our case the only 'physical sensor' is the rocket simulation. This component is a naive implementation of the rocket model introduced earlier. Every time the scheduling port receives an event, the rocket simulation component updates the state of the rocket and invokes the output ports to send those to the connected component. The integration of the rocket equation is done by a left Riemann sum without regard to numerical stability. The purpose is solely to test the rest of the system. Care must be taken that the time step in the simulation corresponds to the time step of the to `schedIn` connected `rateGroup`. For simplicity this has to be done manually; if the update time value in `run1cycle` in `Top/Main.cpp` is the same numerical value as `rate_group_dt` the numerical time values correspond to milliseconds and the simulation runs in real-time. Then numerical interval values in the Reelay properties correspond to milliseconds. However the rocket time can be configured to move at an arbitrary rate, but care must be taken to change the interval definitions of the properties accordingly as the `ReelayMonitor`'s inserted time value is in milliseconds and the rocket simulation does not provide it's internal time in our implementation. There is no mechanism to catch this discrepancy.
+
+As mentioned in our case the only 'physical sensor' is the rocket simulation. This component is a naive implementation of the rocket model introduced earlier, with two stages. Once the first stage no longer has fuel for the next time step the second stage gets activated. Every time the scheduling port receives an event, the rocket simulation component updates the state of the rocket and invokes the output ports to send those to the connected component. The integration of the rocket equation is done by a left Riemann sum without regard to numerical stability. The purpose is solely to test the rest of the system. Care must be taken that the time step in the simulation corresponds to the time step of the to `schedIn` connected `rateGroup`. For simplicity this has to be done manually; if the update time value in `run1cycle` in `Top/Main.cpp` is the same numerical value as `rate_group_dt` the numerical time values correspond to milliseconds and the simulation runs in real-time. Then numerical interval values in the Reelay properties correspond to milliseconds. However the rocket time can be configured to move at an arbitrary rate, but care must be taken to change the interval definitions of the properties accordingly as the `ReelayMonitor`'s inserted time value is in milliseconds and the rocket simulation does not provide its internal time in our implementation. We have defined a macro, `BASE_SIMULATION_DELAY` in `RocketSimulator.hpp` to minimize the chance of confusion.
+
+The *rocketState* output port is used to send the current state of the rocket to the `reelayRocketSensor` component when it is invoked (to enable a pull based sensor). It is defined by:
+
+```php
+    RocketStatePort (vI: F32, vDelta: F32, burnrate: F32, stage: RocketStage)
+```
+
+The telemetry ports are used to plot and observe the values from the simulator in the ground station system.
+There is a provided chart definition file called `rocket_charts.txt` in the `Ref` directory. Opening that from the `Charts` tab in the ground system will show plots of the height, acceleration, burnrate, etc. of the rocket.
+The large four large jumps correspond to the launch, the first stage burnout and the second stage ignition and burnout. The small jumps arise from the random terms from our model.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/acceleration.png}
+    \includegraphics[width=0.8\textwidth]{figures/burnrate.png}
+    \includegraphics[width=0.8\textwidth]{figures/remaining_fuel.png}
+    \caption{Some values of the rocket plotted (acceleration, burnrate, remaining fuel) over time)}
+\end{figure}
 
 
-## !!! Build system (0.5 p)
-
-There is a non-trivial amount of CMake used by F' deployments to build deployments. This makes changes to the build settings - even for relatively simple tasks such as keeping debug symbols in the final binary - relatively challenging. Thus we will give a brief outline of how to adapt the CMake files for the deployment to include the Reelay components and their dependencies.
+The rocket model with normally distributed erros with mean 0 and $\sigma_a = 0.01$ and $\sigma_d = 0.5$ (same notation as in \ref{rocket_model_example_introduction}) has the follwing speeds and speed difference:
 
 
-## !!! Running example code output (1p)
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/speeds.png}
+    \caption{Speed and speed difference of the rocket}
+    \label{speeds}
+\end{figure}
 
-When starting `fprime-gds` the simulation is initially turned off. When sending the command `TOGGLE_SIMULATION` the simulation is turned on and the rocket starts to move. The simulation can be turned off again by sending the same command. Once the simulation is started it advances by time-steps `dt`. To change the speed at which the simulation runs one needs to configure the cycle duration of the F' deployment. In our example deployment this means changing the `run1cycle` function inside `Main.cpp` inside the `Top` folder.
+From \ref{speeds} shows from top-to-bottom: $v_I$, $v_\Delta$, $v_d$ over time.
+
+## Build system
+\label{build_system}
+
+There is a non-trivial amount of CMake used by F' deployments to build deployments. This makes changes to the build settings - even for relatively simple tasks such as keeping debug symbols in the final binary - relatively challenging. Thus we will give a brief outline of how to adapt the CMake files for the deployment to include the Reelay components and their dependencies. 
+
+The F' build system is organized by heavy use of the CMake function `add_fprime_subdirectory(dir)`, which takes the name of a directory and adds its content to the current build - handling F' specific things such as FPP component declarations and the test setups. Inside the specified directory the `add_fprime_subdirectory(dir)` function expects a `CMakeLists.txt` file containing usually a declaration of the `.fpp` and `.hpp` files to be included by this subdirectory and a call to register the current subdirectory as an fprime module (`register_fprime_module()`):
+
+```php
+set(SOURCE_FILES
+    "${CMAKE_CURRENT_LIST_DIR}/Component_specification.fpp"
+    "${CMAKE_CURRENT_LIST_DIR}/Component_specification.hpp"
+)
+
+register_fprime_module()
+```
+
+There is a top-level `CMakeLists.txt` file that is responsible for including the necessary modules. This is where a user of our components would have to add the line `add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/ReelayComponents/")` where `ReelayComponents` is the directory which contains the `CMakeLists.txt` importing our provided components.
+
+Reelay depends upon the *cudd* library for implementing the monitors  [@maidanskiIvmaiCudd2022]. Therefore we have to link any executables created by the build system with that library.
+First, we have to locate the library on the system of the user. This is achieved by using the CMake functions 
+
+```php
+add_library(CUDD_LIB STATIC IMPORTED GLOBAL)
+find_library(CUDD_LIB NAMES libcudd)
+```
+in the `CMakeLists.txt` in `ReelayComponents` which, if one has installed cudd, will create a Cmake library referenced by the name `CUDD_LIB`.
+But then to link to the library we have to use the following in the highest-level `CMakeLists.txt` file (in the example this is the one located `example/Ref`):
+
+```php
+target_link_libraries("${PROJECT_NAME}" PUBLIC "${CUDD_LIB}")
+```
+
+This is not great because it forces the user of our components to make two changes to that file. But due to lack of documentation, the complexity of the F' build system, and variable shadowing of the `${PROJECT_NAME}` in submodules we were unable to create a more elegant solution.
+
+## Workflow
+
+The Workflow of monitoring an F' deployment can be summarised as follows:
+
+1. Understand the system to be monitored and the properties to be verified
+2. Specify the properties to be verified in natural language (e.g., the stages should increase monotonically).
+3. Generate the Reelay formulas from the natural language specifications.
+4. Determine where the necessary data originates and where it will be required; how many Monitors should there be? What kind of Reelay sensors should be used? Should the JSON events be created directly? Is there an opportunity to use temporal logic instead of ad-hoc methods for determining certain states?
+5. Create the necessary components and connect them to satisfy the requirements in (4)
+6. The result of (5) is a topology using our provided components to verify the specification from (2).
+7. Run the deployment and observe the results.
+
+## Workflow Example
+
+As there are a lot of technical details to get F' to interact with the ground station system. For sake of simplicity we assume that we take the `Ref` example deployment, which already implements these details and will extend it to contain the following topology:
+
+\begin{figure}[h]
+    \centering
+    \ctikzfig{rocket_example_topo}
+    \caption{Rocket Simulation Topology}
+\end{figure}
+
+We take the properties from the example deployment formulated in the RYE format directly from \ref{rye_properties}. With that and \ref{rocket_example_introduction}, we have steps (0), (1), (2) complete.
+
+Now one needs to copy the the provided directory containing the Reelay components into `/Ref/`. Then add the necessary lines to the `CMakeLists.txt` mentioned in \ref{build_system}. Further add the following line to the `Ref/CMakeLists.txt` file to load the Reelay components:
+
+```php
+add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Reelay/")
+```
+
+As we wish to demonstrate a minimum viable sensor and monitor setup we will have one `ReelayMonitor` and one `ReelayStaticSimulator` implemented for transforming the data of our rocket simulation into JSON-events. With that step (4) is complete. Because the `Sensor` is implementation specific we put it in the namespace `Ref`, just as the `RocketSimulator`.
+
+To construct our topology and achieve step (5) we need to create instances of the components used so in the `instances.fpp` file in the `/Ref/Top` directory we add the following:
+
+```C++
+     instance rocketSimulator: Ref.RocketSimulator base id 0xE400
+
+     instance reelayRocketSensor: Ref.ReelayRocketSensor base id 0x0E200
+
+    instance reelayMonitor: Reelay.ReelayMonitor base id 0xE000\
+    {
+      phase Fpp.ToCpp.Phases.configComponents """
+        reelayMonitor.add_property("\
+        ({stage: 'FirstStage'} since not {stage: 'Prelaunch'})\
+        or ({stage: 'SecondStage'} since not {stage: 'FirstStage'}\
+        or ({stage: 'Descent'} since not {stage: 'SecondStage'}\
+        or ({stage: 'Landed'} since not {stage: 'Descent'})", 0);
+
+        reelayMonitor.add_property("({stage: 'FirstStage'} or {stage: 'SecondStage'})\
+            -> {v_Delta < 10}", 1);
+
+        reelayMonitor.add_property("{burnrate > 1800} since[0:1000] {stage: 'FirstStage'}", 2);
+        """
+    }
+```
+
+For simplicity again we assume the existence of two instances of `Svc.ActiveRateGroup` named `simulationRateGroup` and `reelaySensorRateGroup`.
+
+Then in `topology.fpp` inside of `/Ref/Top` we add the following:
+
+```C++
+connections Monitoring {
+
+    connection simulationRateGroup.RateGroupMemberOut[0] -> rocketSimulator.schedIn
+    connection reelaySensorRateGroup.RateGroupMemberOut[0] -> reelayRocketSensor.schedIn
+
+    connection reelayRocketSensor.rocketState -> rocketSimulator.rocketState
+    connection reelayRocketSensor.reelayEvent -> reelayMonitor.eventIn
+}
+```
+
+Finally we run `fprime-util generate` and `fprime-util build` to generate the necessary code and build the executable. The result is a binary that can be run by running `fprime-gds` in the `Ref` directory. 
+
+When starting `fprime-gds` the simulation is initially turned off so one can load the provided chart definitions to observe the simulation. When sending the command `TOGGLE_SIMULATION` the simulation is turned on and the rocket starts to move. Once the simulation is started it advances by time-steps `dt`. At every time step, new values for the rocket state are calculated.
+
+To change the speed at which the simulation runs one needs to configure the cycle duration of the F' deployment. In our example deployment, this means changing the `run1cycle` function inside `Main.cpp` inside the `Top` folder.
+
+\newpage
+
+## Workflow Example Outputs
 
 
-## !!! Discussion (1p)
+Figure \ref{all_passing} shows the event stream when the standard deviations of the simulation are chosen small, so the error never gets big enough to cause our properties to no longer be valid. So they all hold.
 
-- Performance of ReelayMonitor (time horizon, complexity of property)
-- F' particularities / challenges (thoughts on F´)
-- due to the way fprime components are instantiated there is less opportunity for compile time optimizations which have overall been a trend in newer C++ editions
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/all_passing.png}
+    \caption{Screenshot of the ground system Events overview showing all properties passing, with the logging of positive verdicts enabled}
+    \label{all_passing}
+\end{figure}
+
+
+Figure \ref{not_all_passing} shows the event stream when the standard deviations of the simulation are chosen large (here $\sigma_a = \sigma_b = 15$), the error gets big enough to cause our speed difference property (P3 from \ref{rye_properties}) to fail. The green events mark the simulation start command and the event informing us of the execution of the command.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/not_all_passing.png}
+    \caption{Event stream when not all properties positively verified}
+    \label{not_all_passing}
+\end{figure}
+
+Similarly for large enough values of $\sigma_b$ the property P2 will fail. There is further information written to the log visible in the corresponding tab. For example the events being processed.
+
+
+\newpage
+\newpage
+
+# Discussion
 
 As mentioned one of the issues with the monitor-design pattern in FPP is that there is no way for a user to define the type of data that is sent over the `serial` connections and have the compatibility of this declaration verified in regards to the type of data that is actually sent. This issue could be solved in stand-alone C++ using templated classes, but neither F' nor FPP have such a concept, though it would in our opinion greatly ease the creation of reusable components.
 
+Whilst altering the provided components to use R2U2 was considered - and would be reasonably straightforward - it was deemed out-of-scope for this thesis. As mentioned in [related_work] R2U2 has some distinct advantages over Reelay but all the additional user functionality comes at the cost of complexity which is not coherent with the philosophy of rapid development present in F'. But an unmatched benefit of R2U2 is the ability to compile the monitors to Verilog and thus to FPGA's. 
 
+As F' allows for components to be physically distributed accross space (and thus time) the naive notion of time used by our monitor might not always suffice. But we deemed this out-of-scope for this thesis.
 
+## Conclusions and Outlook
 
+We have shown how to build components for runtime verification for F' on the basis of Reelay and showed different approaches of how to integrate such a component. We have also implemented a fully reusable monitor component and shown its usefullness by providing a small example. This demonstrates the feasability of creating more advanced and more reusable components in F' and the potential of the monitor-design pattern for runtime verification in a component based architecture.
 
+We also motivated and outlined future work towards a reusable Reelay event translator, a generic `ReelaySensor`. But this work also indicates the need for a more general solution to the problem of compile time checked parametric-like types in FPP.
 
-# !!! Conclusions and Outlook (1p)
+Further work is required to test the performance implications of our components on embedded systems as well as show the feasibility of using our components in a more complex F' deployment. Another avenue for exploration might be how to integrate another Runtime verification framework such as R2U2 using our Architectural approach.
 
-- Brief summary
-- What would you pursue next to realize an end to end system? What are interesting avenues for investigation
-  - End user has to think about delay introduced when distributing components
-  - Delay might be dynamic (relativistic effects cannot be ignored under all circumstances this system might be deoployed in)
-    
-!!! Another evaluation angle would have involved studying the effect of using ReelayMonitor on an existing F' deployment
+We also hope that this thesis and the accompanying code will serve as a starting point for others to explore the possibilities of runtime verification in F' or for the developement of reusable F' components in general.
 
-Whilst altering the provided components to use R2U2 was considered - and would be reasonably straightforward - it was deemed out-of-scope for this thesis.
-
-As mentioned in [related_work] R2U2 has some distinct advantages over Reelay but all the additional user functionality comes at the cost of complexity which is not coherent with the philosophy of rapid development present in F'.
-
-R2U2 also has a Simulink integration, which is similar in spirit to the integration of reelay with F´ we propose here. Though tapping into the massive Simulink ecosystem certainly has its benefit we feel the downsides of proprietary and costly system outweigh the benefits for our targeted domain.
-[](Other major approaches doing RV for aero/space, the FPGA ones, embedded systems etc)
+The code can be found on [\underline{github}](https://github.com/romanriesen/bachelorthesis) or the [\underline{university of bern gitlab}](https://gitlab.inf.unibe.ch/rr17g037/roman_riesen_thesis).
 
 \newpage
 \printbibliography
+ 
+\newpage
+
+\includepdf[pages=-]{./erklaerung.pdf}

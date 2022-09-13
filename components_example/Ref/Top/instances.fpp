@@ -353,14 +353,12 @@ module Ref {
   instance reelayMonitor: ReelayComponents.ReelayMonitor base id 0xE000\
     {
       phase Fpp.ToCpp.Phases.configComponents """
-        //reelayMonitor.add_property("({s: 'FirstStage'} since !{s: 'Prelaunch'}) or ({s: 'SecondStage'} since !{s: 'FirstStage'}) or ({s: 'Descent'} since !{s: 'SecondStage'}) or ({s: 'Landed'} since !{s: 'Descent'})", 0);
-        //reelayMonitor.add_property("{b > 10} since[1:2] {s: 'FirstStage'}", 1);
-        //reelayMonitor.add_property("{s: 'FristStage'} since[2:0] {s: 'FirstStage'}", 1);
-        //reelayMonitor.add_property("{s: 'FirstStage'} -> {b > 10}", 4);
-        //reelayMonitor.add_property(R"(once[0:10]{s: "FirstStage"})", 5);
-        //reelayMonitor.add_property("({s: 'FirstStage'} or {s: 'SecondStage'}) -> {v_D < 1}", 2);
+        reelayMonitor.add_property("({s: 'FirstStage'} since !{s: 'Prelaunch'}) or ({s: 'SecondStage'} since !{s: 'FirstStage'}) or ({s: 'Descent'} since !{s: 'SecondStage'}) or ({s: 'Landed'} since !{s: 'Descent'})", 0);
+        reelayMonitor.add_property("({s: 'FirstStage'} or {s: 'SecondStage'}) -> {v_D < 1}", 1);
+        reelayMonitor.add_property("({b > 1800} since[0:10]{s: 'FirstStage'}) or (not {s: 'FirstStage'})", 2);
+        //below are some sanity check properties handy fo debugging monitor settings
         //reelayMonitor.add_property("not {s:'FirstStage'}", 3);
-        reelayMonitor.add_property("historically[0:2000] {s: 'FristStage'}", 3);
+        //reelayMonitor.add_property("historically[0:2000] {s: 'FristStage'}", 3);
 
         """
     }

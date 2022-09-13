@@ -54,17 +54,16 @@ module Ref {
         @ Time get
         time get port timeGetOut
 
-        #port SetDataGeneration(is_running: bool)
-
-        #input port setDataGeneration : SetDataGeneration
         sync command TOGGLE_SIMULATION()
         sync input port schedIn: Svc.Sched
-        output port speedD : F32Value
-        output port speedI : F32Value
-        output port rocket_t : F32Value
-        output port exhaustVelocity : F32Value
-        output port stage : StringValue
-        output port height : F32Value
+
+        # These ports would be used by the generic reelay sensor
+        #output port speedD : F32Value
+        #output port speedI : F32Value
+        #output port rocket_t : F32Value
+        #output port exhaustVelocity : F32Value
+        #output port stage : StringValue
+        #output port height : F32Value
 
         output port all_values : RocketStatePort
 

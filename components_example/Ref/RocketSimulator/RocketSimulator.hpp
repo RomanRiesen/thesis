@@ -47,10 +47,10 @@ namespace Ref {
     std::random_device rd{};
     std::mt19937 generator{rd()};//rd()
 
-    std::normal_distribution<> e_a {0.0, 0.01};
-    std::normal_distribution<> e_d {0.0, 0.5};
-    std::normal_distribution<> e_b1 {0.0, 1};
-    std::normal_distribution<> e_b2 {0.0, 0.5};
+    std::normal_distribution<> e_a {0.0, 0.1};
+    std::normal_distribution<> e_d {0.0, 0.9};
+    std::normal_distribution<> e_b1 {0.0, 100};
+    std::normal_distribution<> e_b2 {0.0, 50};
 
     bool is_running = false;
 

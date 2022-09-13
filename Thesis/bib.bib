@@ -18,6 +18,13 @@
   file = {C\:\\Users\\User\\Zotero\\storage\\CEJHIM5B\\Ait Ameur and Schewe - 2014 - Abstract State Machines, Alloy, B, TLA, VDM, and Z.pdf}
 }
 
+@online{ArmCortexM4Processor,
+  title = {Arm {{Cortex-M4 Processor Technical Reference Manual Revision}} R0p1},
+  url = {https://developer.arm.com/documentation/100166/0001},
+  urldate = {2022-09-09},
+  file = {C\:\\Users\\User\\Zotero\\storage\\PRAZXBGR\\0001.html}
+}
+
 @article{avizienisBasicConceptsTaxonomy2004,
   title = {Basic Concepts and Taxonomy of Dependable and Secure Computing},
   author = {Avizienis, A. and Laprie, J.-C. and Randell, B. and Landwehr, C.},
@@ -143,6 +150,19 @@
   file = {C\:\\Users\\User\\Zotero\\storage\\HEXQ95SD\\small-spacecraft-avionics.html}
 }
 
+@inproceedings{caoAutomatedRuntimeVerification2010,
+  title = {Automated {{Runtime Verification}} for {{Web Services}}},
+  booktitle = {2010 {{IEEE International Conference}} on {{Web Services}}},
+  author = {Cao, Tien-Dung and Phan-Quang, Trung-Tien and Felix, Patrick and Castanet, Richard},
+  date = {2010-07},
+  pages = {76--82},
+  doi = {10.1109/ICWS.2010.19},
+  abstract = {This paper presents a methodology to perform passive testing of behavioural conformance for the web services based on the security rule. The proposed methodology can be used either to check a trace (offline checking) or to runtime verification (online checking) with timing constraints, including future and past time. In order to perform this: firstly, we use the Nomad language to define the security rules. Secondly, we propose an algorithm that can check simultaneously multi instances. Afterwards, with each security rule, we propose a graphical statistics, with some fixed properties, that helps the tester to easy assess about the service. In addition to the theoretical framework we have developed a software tool, called RV4WS (Runtime Verification engine for Web Service), that helps in the automation of our passive testing approach. In particular the algorithm presented in this paper is fully implemented in the tool. We also present a mechanism to collect the observable trace in this paper.},
+  eventtitle = {2010 {{IEEE International Conference}} on {{Web Services}}},
+  keywords = {Context,Engines,Nomad language,Passive testing,Rule specification,Runtime,Runtime verification,Security,Testing,Time factors,Web services,Web Services},
+  file = {C\:\\Users\\User\\Zotero\\storage\\Z2I8I235\\Cao et al. - 2010 - Automated Runtime Verification for Web Services.pdf;C\:\\Users\\User\\Zotero\\storage\\IGZBK65I\\5552799.html}
+}
+
 @online{CodeStyleGuidelines,
   title = {Code and {{Style Guidelines}}},
   url = {https://nasa.github.io/fprime/UsersGuide/dev/code-style.html},
@@ -151,6 +171,13 @@
   langid = {american},
   organization = {{F´}},
   file = {C\:\\Users\\User\\Zotero\\storage\\JEEIMJRG\\code-style.html}
+}
+
+@online{CopilotHome,
+  title = {Copilot: Home},
+  url = {https://copilot-language.github.io/},
+  urldate = {2022-09-09},
+  file = {C\:\\Users\\User\\Zotero\\storage\\WPBFBFIM\\copilot-language.github.io.html}
 }
 
 @online{Features,
@@ -353,6 +380,16 @@
   file = {C\:\\Users\\User\\Zotero\\storage\\BGTYFBXM\\magicdraw.html}
 }
 
+@software{maidanskiIvmaiCudd2022,
+  title = {Ivmai/Cudd},
+  author = {Maidanski, Ivan},
+  date = {2022-09-01T20:31:28Z},
+  origdate = {2016-01-20T23:25:05Z},
+  url = {https://github.com/ivmai/cudd},
+  urldate = {2022-09-07},
+  abstract = {CUDD: CU Decision Diagram package - unofficial git mirror of https://web.archive.org/web/20180127051756/http://vlsi.colorado.edu/\textasciitilde fabio/CUDD/html/index.html (intro: https://web.archive.org/web/20150215010018/http://vlsi.colorado.edu/\textasciitilde fabio/CUDD/cuddIntro.html)}
+}
+
 @online{ManEquationRocket,
   title = {A {{Man}} – and an Equation – {{Rocket Science}}},
   url = {https://blogs.esa.int/rocketscience/2012/10/14/a-man-and-an-equation/},
@@ -433,6 +470,38 @@
   url = {https://www.zdnet.com/article/nasas-ingenuity-mars-helicopter-has-a-problem-this-clever-software-trick-could-fix-it/},
   urldate = {2022-07-29},
   file = {C\:\\Users\\User\\Zotero\\storage\\VW6Y8HCL\\nasas-ingenuity-mars-helicopter-has-a-problem-this-clever-software-trick-could-fix-it.html}
+}
+
+@inproceedings{nassarNUVAArchitecturalSupport2015,
+  title = {{{NUVA}}: {{Architectural}} Support for Runtime Verification of Parametric Specifications over Multicores},
+  shorttitle = {{{NUVA}}},
+  booktitle = {2015 {{International Conference}} on {{Compilers}}, {{Architecture}} and {{Synthesis}} for {{Embedded Systems}} ({{CASES}})},
+  author = {Nassar, Ahmed and Kurdahi, Fadi J. and Elsharkasy, Wael},
+  date = {2015-10},
+  pages = {137--146},
+  doi = {10.1109/CASES.2015.7324554},
+  abstract = {Runtime Verification (RV) has recently emerged as a complementary technology to extend coverage of conventional software verification methods. To address the substantial performance and power overhead of pure software RV frameworks, this paper introduces NUVA, which stands for nonuniform verification architecture, a distributed automata-based RV architecture for parametric specifications in the form of parameterized finite-state automata, with a case study over a cache-coherent nonuniform-memory-access (ccNUMA) multiprocessor. The core of NUVA is a coherent distributed automata transactional memory (ATM) that efficiently maintains states of a dynamic population of automata checkers organized into a rooted dynamic directed acyclic graph (DAG) concurrently shared among all processor nodes. A cycle-accurate model of a ccNUMA multiprocessor confirms that performance slowdown is 1 3\% and NoC message traffic increases by 10 15\% at parametric event density1 of 0.025 EPI for two compute-intensive scientific benchmarks having irregular concurrent data structures. The detailed architecture and implementation metrics in TSMC 40nm CMOS technology are presented. NUVA can be dimensioned to incur average total power overhead of less than 140mW and area overhead of 4mm2 for a quad-core multiprocessor chip, at operating frequency of 250MHz. It is also estimated to incur 1.9 2.6\% area overhead and 0.5 1\% power overhead when integrated with Intel's family of high-end desktop and mobile quad-core processors operating at 1.6 3.2GHz. Our silicon implementation achieves average performance2 of 1.5 MEPS/mW. For a processor core with 5 MIPS/mW, this corresponds to a 3.2\% drop in energy efficiency at parametric event density of 0.01 EPI.},
+  eventtitle = {2015 {{International Conference}} on {{Compilers}}, {{Architecture}} and {{Synthesis}} for {{Embedded Systems}} ({{CASES}})},
+  keywords = {automata,Automata,Computer bugs,concurrency,Cost accounting,Hardware,Monitoring,Runtime,Runtime verification,Semantics},
+  file = {C\:\\Users\\User\\Zotero\\storage\\SMFEMWBE\\Nassar et al. - 2015 - NUVA Architectural support for runtime verificati.pdf;C\:\\Users\\User\\Zotero\\storage\\2QX6S8P8\\7324554.html}
+}
+
+@article{newcombeHowAmazonWeb2015,
+  title = {How {{Amazon}} Web Services Uses Formal Methods},
+  author = {Newcombe, Chris and Rath, Tim and Zhang, Fan and Munteanu, Bogdan and Brooker, Marc and Deardeuff, Michael},
+  date = {2015-03-23},
+  journaltitle = {Communications of the ACM},
+  shortjournal = {Commun. ACM},
+  volume = {58},
+  number = {4},
+  pages = {66--73},
+  issn = {0001-0782, 1557-7317},
+  doi = {10.1145/2699417},
+  url = {https://dl.acm.org/doi/10.1145/2699417},
+  urldate = {2022-09-09},
+  abstract = {Engineers use TLA+ to prevent serious but subtle bugs from reaching production.},
+  langid = {english},
+  file = {C\:\\Users\\User\\Zotero\\storage\\ZK3TTTFN\\Newcombe et al. - 2015 - How Amazon web services uses formal methods.pdf}
 }
 
 @incollection{ohrstromFutureContingents2020,
@@ -577,6 +646,16 @@
   file = {C\:\\Users\\User\\Zotero\\storage\\L9RVU955\\Ulus - 2019 - Online Monitoring of Metric Temporal Logic using S.pdf;C\:\\Users\\User\\Zotero\\storage\\ZMVTEETU\\1901.html}
 }
 
+@software{ulusReelayMonitors2022,
+  title = {Reelay {{Monitors}}},
+  author = {Ulus, Doğan},
+  date = {2022-07-30T08:07:07Z},
+  origdate = {2019-07-07T18:29:28Z},
+  url = {https://github.com/doganulus/reelay/blob/bc30e86f888e903e0521c90637147e21d6080dce/docs/gs_cpp.md},
+  urldate = {2022-09-07},
+  abstract = {A header-only C++ library for system-level verification and declarative testing of real-time systems with Python bindings.}
+}
+
 @article{villelaThousandthCubeSatStatistical2019,
   title = {Towards the {{Thousandth CubeSat}}: {{A Statistical Overview}}},
   shorttitle = {Towards the {{Thousandth CubeSat}}},
@@ -593,6 +672,78 @@
   abstract = {CubeSats have become an interesting innovation in the space sector. Such platforms are being used for several space applications, such as education, Earth remote sensing, science, and defense. As of May 31st, 2018, 855 CubeSats had been launched. Remote sensing application is the main sector in which CubeSats are being used, corresponding to about 45\% of all applications. This fact indicates the commercial potential of such a platform. Fifty eight countries have already been involved with developing CubeSats. The most used CubeSat configuration is 3U (about 64\%), followed by 1U (18\%), while 6U platforms account for about 4\%. In this paper, we present an analysis of the current situation regarding CubeSats worldwide, through the use of a dataset built to encompass information about these satellites. The overall success rate of the CubeSat missions is increasing over time. Moreover, considering CubeSat missions as a Bernoulli experiment, and excluding launch failures, the current success rate was estimated, as a parameter of a binomial distribution, to be about 75\%. By using a logistic model and considering that the launchings keep following the current tendency, one can expect that one thousand CubeSats will be launched in 2021, within 95\% certainty.},
   langid = {english},
   file = {C\:\\Users\\User\\Zotero\\storage\\3KXM5W8X\\Villela et al. - 2019 - Towards the Thousandth CubeSat A Statistical Over.pdf}
+}
+
+@article{zhengRealTimeSimulationSupport2017,
+  title = {Real-{{Time Simulation Support}} for {{Runtime Verification}} of {{Cyber-Physical Systems}}},
+  author = {Zheng, Xi and Julien, Christine and Chen, Hongxu and Podorozhny, Rodion and Cassez, Franck},
+  date = {2017-11-30},
+  journaltitle = {ACM Transactions on Embedded Computing Systems},
+  shortjournal = {ACM Trans. Embed. Comput. Syst.},
+  volume = {16},
+  number = {4},
+  pages = {1--24},
+  issn = {1539-9087, 1558-3465},
+  doi = {10.1145/3063382},
+  url = {https://dl.acm.org/doi/10.1145/3063382},
+  urldate = {2022-09-09},
+  abstract = {In Cyber-Physical Systems (CPS), cyber and physical components must work seamlessly in tandem. Runtime verification of CPS is essential yet very difficult, due to deployment environments that are expensive, dangerous, or simply impossible to use for verification tasks. A key enabling factor of runtime verification of CPS is the ability to integrate real-time simulations of portions of the CPS into live running systems. We propose a verification approach that allows CPS application developers to opportunistically leverage real-time simulation to support runtime verification. Our approach, termed B               race               B               ind               , allows selecting, at runtime, between actual physical processes or simulations of them to support a running CPS application. To build B               race               B               ind               , we create a real-time simulation architecture to generate and manage multiple real-time simulation environments based on existing simulation models in a manner that ensures sufficient accuracy for verifying a CPS application. Specifically, B               race               B               ind               aims to both improve simulation speed and minimize latency, thereby making it feasible to integrate simulations of physical processes into the running CPS application. B               race               B               ind               then integrates this real-time simulation architecture with an existing runtime verification approach that has low computational overhead and high accuracy. This integration uses an aspect-oriented adapter architecture that connects the variables in the cyber portion of the CPS application with either sensors and actuators in the physical world or the automatically generated real-time simulation. Our experimental results show that, with a negligible performance penalty, our approach is both efficient and effective in detecting program errors that are otherwise only detectable in a physical deployment.},
+  langid = {english},
+  file = {C\:\\Users\\User\\Zotero\\storage\\FYABIMZ3\\Zheng et al. - 2017 - Real-Time Simulation Support for Runtime Verificat.pdf}
+}
+
+@article{zhengRealTimeSimulationSupport2017a,
+  title = {Real-{{Time Simulation Support}} for {{Runtime Verification}} of {{Cyber-Physical Systems}}},
+  author = {Zheng, Xi and Julien, Christine and Chen, Hongxu and Podorozhny, Rodion and Cassez, Franck},
+  date = {2017-11-30},
+  journaltitle = {ACM Transactions on Embedded Computing Systems},
+  shortjournal = {ACM Trans. Embed. Comput. Syst.},
+  volume = {16},
+  number = {4},
+  pages = {1--24},
+  issn = {1539-9087, 1558-3465},
+  doi = {10.1145/3063382},
+  url = {https://dl.acm.org/doi/10.1145/3063382},
+  urldate = {2022-09-09},
+  abstract = {In Cyber-Physical Systems (CPS), cyber and physical components must work seamlessly in tandem. Runtime verification of CPS is essential yet very difficult, due to deployment environments that are expensive, dangerous, or simply impossible to use for verification tasks. A key enabling factor of runtime verification of CPS is the ability to integrate real-time simulations of portions of the CPS into live running systems. We propose a verification approach that allows CPS application developers to opportunistically leverage real-time simulation to support runtime verification. Our approach, termed B               race               B               ind               , allows selecting, at runtime, between actual physical processes or simulations of them to support a running CPS application. To build B               race               B               ind               , we create a real-time simulation architecture to generate and manage multiple real-time simulation environments based on existing simulation models in a manner that ensures sufficient accuracy for verifying a CPS application. Specifically, B               race               B               ind               aims to both improve simulation speed and minimize latency, thereby making it feasible to integrate simulations of physical processes into the running CPS application. B               race               B               ind               then integrates this real-time simulation architecture with an existing runtime verification approach that has low computational overhead and high accuracy. This integration uses an aspect-oriented adapter architecture that connects the variables in the cyber portion of the CPS application with either sensors and actuators in the physical world or the automatically generated real-time simulation. Our experimental results show that, with a negligible performance penalty, our approach is both efficient and effective in detecting program errors that are otherwise only detectable in a physical deployment.},
+  langid = {english},
+  file = {C\:\\Users\\User\\Zotero\\storage\\JR6TR5JS\\Zheng et al. - 2017 - Real-Time Simulation Support for Runtime Verificat.pdf}
+}
+
+@article{zhengRealTimeSimulationSupport2017b,
+  title = {Real-{{Time Simulation Support}} for {{Runtime Verification}} of {{Cyber-Physical Systems}}},
+  author = {Zheng, Xi and Julien, Christine and Chen, Hongxu and Podorozhny, Rodion and Cassez, Franck},
+  date = {2017-05-11},
+  journaltitle = {ACM Transactions on Embedded Computing Systems},
+  shortjournal = {ACM Trans. Embed. Comput. Syst.},
+  volume = {16},
+  number = {4},
+  pages = {106:1--106:24},
+  issn = {1539-9087},
+  doi = {10.1145/3063382},
+  url = {https://doi.org/10.1145/3063382},
+  urldate = {2022-09-09},
+  abstract = {In Cyber-Physical Systems (CPS), cyber and physical components must work seamlessly in tandem. Runtime verification of CPS is essential yet very difficult, due to deployment environments that are expensive, dangerous, or simply impossible to use for verification tasks. A key enabling factor of runtime verification of CPS is the ability to integrate real-time simulations of portions of the CPS into live running systems. We propose a verification approach that allows CPS application developers to opportunistically leverage real-time simulation to support runtime verification. Our approach, termed BraceBind, allows selecting, at runtime, between actual physical processes or simulations of them to support a running CPS application. To build BraceBind, we create a real-time simulation architecture to generate and manage multiple real-time simulation environments based on existing simulation models in a manner that ensures sufficient accuracy for verifying a CPS application. Specifically, BraceBind aims to both improve simulation speed and minimize latency, thereby making it feasible to integrate simulations of physical processes into the running CPS application. BraceBind then integrates this real-time simulation architecture with an existing runtime verification approach that has low computational overhead and high accuracy. This integration uses an aspect-oriented adapter architecture that connects the variables in the cyber portion of the CPS application with either sensors and actuators in the physical world or the automatically generated real-time simulation. Our experimental results show that, with a negligible performance penalty, our approach is both efficient and effective in detecting program errors that are otherwise only detectable in a physical deployment.},
+  keywords = {Runtime verification},
+  file = {C\:\\Users\\User\\Zotero\\storage\\HGPQ6X48\\Zheng et al. - 2017 - Real-Time Simulation Support for Runtime Verificat.pdf}
+}
+
+@article{zhengRealTimeSimulationSupport2017c,
+  title = {Real-{{Time Simulation Support}} for {{Runtime Verification}} of {{Cyber-Physical Systems}}},
+  author = {Zheng, Xi and Julien, Christine and Chen, Hongxu and Podorozhny, Rodion and Cassez, Franck},
+  date = {2017-11-30},
+  journaltitle = {ACM Transactions on Embedded Computing Systems},
+  shortjournal = {ACM Trans. Embed. Comput. Syst.},
+  volume = {16},
+  number = {4},
+  pages = {1--24},
+  issn = {1539-9087, 1558-3465},
+  doi = {10.1145/3063382},
+  url = {https://dl.acm.org/doi/10.1145/3063382},
+  urldate = {2022-09-09},
+  abstract = {In Cyber-Physical Systems (CPS), cyber and physical components must work seamlessly in tandem. Runtime verification of CPS is essential yet very difficult, due to deployment environments that are expensive, dangerous, or simply impossible to use for verification tasks. A key enabling factor of runtime verification of CPS is the ability to integrate real-time simulations of portions of the CPS into live running systems. We propose a verification approach that allows CPS application developers to opportunistically leverage real-time simulation to support runtime verification. Our approach, termed B               race               B               ind               , allows selecting, at runtime, between actual physical processes or simulations of them to support a running CPS application. To build B               race               B               ind               , we create a real-time simulation architecture to generate and manage multiple real-time simulation environments based on existing simulation models in a manner that ensures sufficient accuracy for verifying a CPS application. Specifically, B               race               B               ind               aims to both improve simulation speed and minimize latency, thereby making it feasible to integrate simulations of physical processes into the running CPS application. B               race               B               ind               then integrates this real-time simulation architecture with an existing runtime verification approach that has low computational overhead and high accuracy. This integration uses an aspect-oriented adapter architecture that connects the variables in the cyber portion of the CPS application with either sensors and actuators in the physical world or the automatically generated real-time simulation. Our experimental results show that, with a negligible performance penalty, our approach is both efficient and effective in detecting program errors that are otherwise only detectable in a physical deployment.},
+  langid = {english},
+  file = {C\:\\Users\\User\\Zotero\\storage\\Q2YMBQFH\\Zheng et al. - 2017 - Real-Time Simulation Support for Runtime Verificat.pdf}
 }
 
 
