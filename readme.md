@@ -4,7 +4,7 @@ This is the readme file belonging to the top-level folder of my bachelor thesis 
 
 Here I will give an overview of how to run the example deployment in the provided docker container.
 
-Inside the `ReelayComponents` folder is another `readme.md` that contains instructions of how to use the constructed components in an F' deployment.
+Inside the `ReelayComponents` directory is another `readme.md` that contains instructions of how to use the constructed components in an F' deployment. And inside the `thesis` directory the thesis source is located.
 
 
 # Run the Example
