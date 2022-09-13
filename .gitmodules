@@ -6,4 +6,4 @@
 	url = https://github.com/doganulus/reelay
 [submodule "ReelayComponents/ReelayComponents/ReelayMonitor/reelay"]
 	path = ReelayComponents/ReelayComponents/ReelayMonitor/reelay
-	url = https://gitlab.inf.unibe.ch/rr17g037/roman_riesen_thesis
+	url = https://github.com/doganulus/reelay
