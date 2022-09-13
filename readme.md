@@ -18,7 +18,7 @@ Prerequisites:
 To run the example first clone this repository to your machine:
 
 ```bash
-git clone --recurse-submodules github.com/RomanRiesen/thesis
+git clone --recurse-submodules https://github.com/RomanRiesen/thesis
 ```
 
 Then cd into the cloned directory:
