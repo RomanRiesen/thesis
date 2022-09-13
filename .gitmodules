@@ -1,6 +1,6 @@
 [submodule "components_example/Ref/ReelayComponents/ReelayMonitor/reelay"]
 	path = components_example/Ref/ReelayComponents/ReelayMonitor/reelay
 	url = https://github.com/doganulus/reelay
-[submodule "ReelayComponents/ReelayComponents/ReelayMonitor/reelay"]
-	path = ReelayComponents/ReelayComponents/ReelayMonitor/reelay
+[submodule "ReelayComponents/ReelayMonitor/reelay"]
+	path = ReelayComponents/ReelayMonitor/reelay
 	url = https://github.com/doganulus/reelay
