@@ -994,7 +994,7 @@ Further work is required to test the performance implications of our components 
 
 We also hope that this thesis and the accompanying code will serve as a starting point for others to explore the possibilities of runtime verification in F' or for the developement of reusable F' components in general.
 
-The code can be found on [\underline{github}](https://github.com/romanriesen/thesis) or the [\underline{university of bern gitlab}](https://gitlab.inf.unibe.ch/rr17g037/roman_riesen_thesis).
+The code can be found on [\underline{github}](https://github.com/romanriesen/thesis) or the [\underline{university of bern gitlab}](https://gitlab.inf.unibe.ch/rr17g037/roman_riesen_thesis). The `thesis_submission` branch contains the software as submitted for grading whilst `main` contains the most up-to-date work.
 
 \newpage
 \printbibliography
